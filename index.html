@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Asistencia Docente</title>
+    <link rel="stylesheet" href="style.css">
+    <script defer src="face-api.min.js"></script>
+    <script defer src="script.js"></script>
+</head>
+<body>
+    <div id="login-form">
+        <h2>Iniciar Sesión / Registrarse</h2>
+        <input type="text" id="username" placeholder="Usuario">
+        <input type="password" id="password" placeholder="Contraseña">
+        <button id="login-button">Ingresar</button>
+        <button id="register-button">Registrarse</button>
+    </div>
+
+    <div class="container">
+        <h1>Registro de Asistencia Docente</h1>
+        <button id="logout-button">Cerrar Sesión</button>
+        <p>Presiona el botón para registrar tu asistencia.</p>
+
+        <div class="video-container">
+            <video id="video" autoplay playsinline></video>
+            <img id="camera-icon" src="https://png.pngtree.com/png-clipart/20220530/original/pngtree-camara-icon-design-png-image_7770222.png" alt="Cámara">
+        </div>
+
+        <button id="capture">Capturar Asistencia</button>
+        <p id="mensaje"></p>
+        <div id="photo-container"></div>
+        
+        <h2>Lista de Asistencia</h2>
+        <table id="attendance-table">
+            <thead>
+                <tr>
+                    <th>Usuario</th>
+                    <th>Fecha</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <div id="background-logo"></div>
+</body>
+</html>
