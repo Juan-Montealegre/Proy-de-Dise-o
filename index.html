@@ -5,16 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro de Asistencia Docente</title>
     <link rel="stylesheet" href="style.css">
-    <script defer src="face-api.min.js"></script>
-    <script defer src="script.js"></script>
 </head>
 <body>
     <div id="login-form">
         <h2>Iniciar Sesión / Registrarse</h2>
         <input type="text" id="username" placeholder="Usuario">
         <input type="password" id="password" placeholder="Contraseña">
-        <button id="login-button">Ingresar</button>
-        <button id="register-button">Registrarse</button>
+
+        <div class="button-group">
+            <button id="login-button">Ingresar</button>
+            <button id="register-button">Registrarse</button>
+        </div>
+
+        <div class="button-group">
+            <button id="voice-login">Iniciar Sesión por Voz</button>
+            <button id="voice-register">Registrarse por Voz</button>
+        </div>
     </div>
 
     <div class="container">
@@ -30,19 +36,35 @@
         <button id="capture">Capturar Asistencia</button>
         <p id="mensaje"></p>
         <div id="photo-container"></div>
-        
+
         <h2>Lista de Asistencia</h2>
         <table id="attendance-table">
             <thead>
                 <tr>
                     <th>Usuario</th>
                     <th>Fecha</th>
+                    <th>Hora</th>
                 </tr>
             </thead>
             <tbody></tbody>
         </table>
     </div>
 
-    <div id="background-logo"></div>
+    <!-- Panel de Administrador -->
+    <div id="admin-panel" class="admin-container">
+        <h2>Panel de Administrador</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Usuario</th>
+                    <th>Fecha</th>
+                    <th>Hora</th>
+                </tr>
+            </thead>
+            <tbody id="admin-attendance"></tbody>
+        </table>
+    </div>
+
+    <script src="script.js"></script>
 </body>
 </html>
