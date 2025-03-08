@@ -1,3 +1,5 @@
+
+/* Estilos generales */
 body {
     font-family: Arial, sans-serif;
     text-align: center;
@@ -6,11 +8,13 @@ body {
         url("https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Escudo_de_la_Universidad_Libre_de_Colombia.svg/2048px-Escudo_de_la_Universidad_Libre_de_Colombia.svg.png") 
         no-repeat center center fixed;
     background-size: cover;
+    color: #fff;
     margin: 0;
     padding: 0;
 }
 
-.container, .admin-container {
+/* Contenedores principales */
+.container, .admin-container, #login-form {
     margin: 50px auto;
     padding: 20px;
     background: white;
@@ -18,8 +22,10 @@ body {
     max-width: 600px;
     border-radius: 10px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    color: #000;
 }
 
+/* Botones */
 button {
     margin-top: 15px;
     padding: 12px 20px;
@@ -36,8 +42,18 @@ button:hover {
     background: #000000;
 }
 
+/* Campos de entrada */
+input, select {
+    width: 90%;
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+}
+
+/* Video */
 .video-container {
-    position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -56,6 +72,29 @@ button:hover {
     transform: scaleX(-1);
 }
 
+/* Estilos para la tabla */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background: white;
+    color: black;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: center;
+}
+
+th {
+    background: #ff0202;
+    color: white;
+}
+
+/* Panel de Administrador */
 .admin-container {
     display: none;
     margin-top: 20px;
@@ -68,21 +107,3 @@ button:hover {
 .admin-container h2 {
     color: #ff0202;
 }
-
-.admin-container table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-}
-
-.admin-container th, .admin-container td {
-    border: 1px solid #ddd;
-    padding: 8px;
-    text-align: center;
-}
-
-.admin-container th {
-    background-color: #ff0202;
-    color: white;
-}
-
