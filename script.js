@@ -60,6 +60,21 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     }
 
+ function login(username, password) {
+        if (users[username]?.password === password) {
+            currentUser = username;
+            userRole = users[username].role;
+            elements.loginForm.style.display = "none";
+            elements.mainContainer.style.display = "block";
+            elements.adminPanel.style.display = userRole === "admin" ? "block" : "none";
+            startCamera();
+            renderAttendanceTable();
+            renderAdminTable();
+        } else {
+            showError("Credenciales incorrectas");
+        }
+    }
+
     function register(username, password, role) {
         if (!username || !password) {
             showError("Debe proporcionar un nombre de usuario y una contraseña.");
@@ -75,20 +90,33 @@ document.addEventListener("DOMContentLoaded", async () => {
         elements.errorMessage.style.color = "green";
     }
 
-    function login(username, password) {
-        if (users[username]?.password === password) {
-            currentUser = username;
-            userRole = users[username].role;
-            elements.loginForm.style.display = "none";
-            elements.mainContainer.style.display = "block";
-            elements.adminPanel.style.display = userRole === "admin" ? "block" : "none";
-            startCamera();
-            renderAttendanceTable();
-            renderAdminTable();
-        } else {
-            showError("Credenciales incorrectas");
+    elements.registerButton.addEventListener("click", () => {
+        const username = elements.usernameInput.value.trim();
+        const password = elements.passwordInput.value.trim();
+        const role = elements.roleSelect.value;
+
+        if (!username || !password) {
+            showError("Debe proporcionar un nombre de usuario y una contraseña.");
+            return;
         }
-    }
+        if (users[username]) {
+            showError("Este usuario ya está registrado.");
+            return;
+        }
+        users[username] = { password, role };
+        localStorage.setItem("users", JSON.stringify(users));
+        elements.errorMessage.textContent = "✅ Usuario registrado correctamente";
+        elements.errorMessage.style.color = "green";
+
+        // Habilitar botón de login
+        elements.loginButton.disabled = false;
+    });
+
+    elements.loginButton.addEventListener("click", () => {
+        const username = elements.usernameInput.value.trim();
+        const password = elements.passwordInput.value.trim();
+        login(username, password);
+    });
 
     function renderAttendanceTable() {
         elements.attendanceTable.innerHTML = "";
@@ -166,6 +194,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     elements.errorMessage.textContent = "✅ Usuario registrado correctamente";
     elements.errorMessage.style.color = "green";
 });
+    
 
 
     elements.voiceRegisterButton.addEventListener("click", () => {
@@ -183,6 +212,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             });
         });
     });
+    
 
     elements.mainContainer.style.display = "none";
     elements.adminPanel.style.display = "none";
