@@ -1,109 +1,194 @@
+// script.js mejorado con feedback visual, sonido, mejoras UX y prevención de errores
 
-/* Estilos generales */
-body {
-    font-family: Arial, sans-serif;
-    text-align: center;
-    background: 
-        linear-gradient(to bottom, rgba(0, 0, 0, 0.9), rgba(255, 0, 0, 0.7), rgba(0, 0, 0, 0.9)), 
-        url("https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Escudo_de_la_Universidad_Libre_de_Colombia.svg/2048px-Escudo_de_la_Universidad_Libre_de_Colombia.svg.png") 
-        no-repeat center center fixed;
-    background-size: cover;
-    color: #fff;
-    margin: 0;
-    padding: 0;
-}
+document.addEventListener("DOMContentLoaded", async () => {
+    const elements = {
+        video: document.getElementById("video"),
+        captureButton: document.getElementById("capture"),
+        errorMessage: document.getElementById("mensaje"),
+        feedbackMessage: document.getElementById("feedback"),
+        loginForm: document.getElementById("login-form"),
+        usernameInput: document.getElementById("username"),
+        passwordInput: document.getElementById("password"),
+        roleSelect: document.getElementById("role-select"),
+        loginButton: document.getElementById("login-button"),
+        registerButton: document.getElementById("register-button"),
+        logoutButton: document.getElementById("logout-button"),
+        attendanceTable: document.querySelector("#attendance-table tbody"),
+        adminPanel: document.getElementById("admin-panel"),
+        adminTable: document.getElementById("admin-attendance"),
+        mainContainer: document.querySelector(".container"),
+        voiceRegisterButton: document.getElementById("voice-register"),
+        voiceLoginButton: document.getElementById("voice-login")
+    };
 
-/* Contenedores principales */
-.container, .admin-container, #login-form {
-    margin: 50px auto;
-    padding: 20px;
-    background: white;
-    width: 90%;
-    max-width: 600px;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    color: #000;
-}
+    let users = JSON.parse(localStorage.getItem("users")) || {};
+    let attendance = JSON.parse(localStorage.getItem("attendance")) || [];
+    let currentUser = "";
+    let userRole = "";
+    let stream = null;
+    const successSound = new Audio("https://www.soundjay.com/buttons/sounds/button-3.mp3");
 
-/* Botones */
-button {
-    margin-top: 15px;
-    padding: 12px 20px;
-    border: none;
-    background: #ff0202;
-    color: white;
-    font-size: 16px;
-    cursor: pointer;
-    border-radius: 5px;
-    transition: background 0.3s;
-}
+    function showError(message) {
+        elements.errorMessage.textContent = `⚠️ ${message}`;
+        elements.errorMessage.style.color = "red";
+    }
 
-button:hover {
-    background: #000000;
-}
+    function showSuccess(message) {
+        elements.feedbackMessage.textContent = message;
+        elements.feedbackMessage.style.color = "green";
+        successSound.play();
+        setTimeout(() => {
+            elements.feedbackMessage.textContent = "";
+        }, 3000);
+    }
 
-/* Campos de entrada */
-input, select {
-    width: 90%;
-    padding: 10px;
-    margin-top: 10px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-    font-size: 16px;
-}
+    async function startCamera() {
+        try {
+            stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            elements.video.srcObject = stream;
+        } catch (error) {
+            showError("No se pudo acceder a la cámara. Verifica los permisos.");
+        }
+    }
 
-/* Video */
-.video-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 320px;
-    height: 240px;
-    margin: 20px auto;
-    background: black;
-    border-radius: 10px;
-    overflow: hidden;
-}
+    function stopCamera() {
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+        }
+    }
 
-#video {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transform: scaleX(-1);
-}
+    function startVoiceRecognition(callback) {
+        try {
+            const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            recognition.lang = "es-ES";
+            recognition.start();
+            recognition.onresult = event => callback(event.results[0][0].transcript.trim());
+            recognition.onerror = () => showError("No se pudo reconocer la voz. Inténtalo de nuevo.");
+        } catch (error) {
+            showError("Tu navegador no soporta reconocimiento de voz.");
+        }
+    }
 
-/* Estilos para la tabla */
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-    background: white;
-    color: black;
-    border-radius: 5px;
-    overflow: hidden;
-}
+    function login(username, password) {
+        if (users[username]?.password === password) {
+            currentUser = username;
+            userRole = users[username].role;
+            elements.loginForm.style.display = "none";
+            elements.mainContainer.style.display = "block";
+            elements.adminPanel.style.display = userRole === "admin" ? "block" : "none";
+            startCamera();
+            renderAttendanceTable();
+            renderAdminTable();
+        } else {
+            showError("Credenciales incorrectas");
+        }
+    }
 
-th, td {
-    border: 1px solid #ddd;
-    padding: 10px;
-    text-align: center;
-}
+    function register(username, password, role) {
+        if (!username || !password) {
+            showError("Debe proporcionar un nombre de usuario y una contraseña.");
+            return;
+        }
+        if (users[username]) {
+            showError("Este usuario ya está registrado.");
+            return;
+        }
+        users[username] = { password, role };
+        localStorage.setItem("users", JSON.stringify(users));
+        elements.errorMessage.textContent = "✅ Usuario registrado correctamente";
+        elements.errorMessage.style.color = "green";
+    }
 
-th {
-    background: #ff0202;
-    color: white;
-}
+    elements.registerButton.addEventListener("click", () => {
+        const username = elements.usernameInput.value.trim();
+        const password = elements.passwordInput.value.trim();
+        const role = elements.roleSelect.value;
+        register(username, password, role);
+    });
 
-/* Panel de Administrador */
-.admin-container {
-    display: none;
-    margin-top: 20px;
-    padding: 20px;
-    background: white;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-}
+    elements.loginButton.addEventListener("click", () => {
+        const username = elements.usernameInput.value.trim();
+        const password = elements.passwordInput.value.trim();
+        login(username, password);
+    });
 
-.admin-container h2 {
-    color: #ff0202;
-}
+    function renderAttendanceTable() {
+        elements.attendanceTable.innerHTML = "";
+        attendance.filter(record => record.usuario === currentUser).forEach(record => {
+            const row = document.createElement("tr");
+            row.innerHTML = `<td>${record.usuario}</td><td>${record.fecha}</td><td>${record.hora}</td>`;
+            elements.attendanceTable.appendChild(row);
+        });
+    }
+
+    function renderAdminTable() {
+        if (userRole !== "admin") return;
+        elements.adminTable.innerHTML = "";
+        attendance.forEach((record, index) => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td>${record.usuario}</td>
+                <td>${record.fecha}</td>
+                <td>${record.hora}</td>
+                <td><button class="delete-btn" data-index="${index}">Eliminar</button></td>
+            `;
+            elements.adminTable.appendChild(row);
+        });
+        document.querySelectorAll(".delete-btn").forEach(button => {
+            button.addEventListener("click", (event) => {
+                const index = event.target.getAttribute("data-index");
+                attendance.splice(index, 1);
+                localStorage.setItem("attendance", JSON.stringify(attendance));
+                renderAdminTable();
+                renderAttendanceTable();
+            });
+        });
+    }
+
+    elements.captureButton.addEventListener("click", () => {
+        if (!currentUser) {
+            showError("Debes iniciar sesión para registrar asistencia.");
+            return;
+        }
+        const now = new Date();
+        const fecha = now.toLocaleDateString();
+        if (attendance.some(record => record.usuario === currentUser && record.fecha === fecha)) {
+            showError("Ya has registrado tu asistencia hoy.");
+            return;
+        }
+        attendance.push({ usuario: currentUser, fecha, hora: now.toLocaleTimeString() });
+        localStorage.setItem("attendance", JSON.stringify(attendance));
+        renderAttendanceTable();
+        renderAdminTable();
+        showSuccess("✅ Asistencia registrada correctamente");
+    });
+
+    elements.logoutButton?.addEventListener("click", () => {
+        currentUser = "";
+        userRole = "";
+        elements.loginForm.style.display = "block";
+        elements.mainContainer.style.display = "none";
+        elements.adminPanel.style.display = "none";
+        stopCamera();
+    });
+
+    elements.voiceRegisterButton.addEventListener("click", () => {
+        startVoiceRecognition(username => {
+            startVoiceRecognition(password => {
+                register(username, password, elements.roleSelect.value);
+            });
+        });
+    });
+
+    elements.voiceLoginButton.addEventListener("click", () => {
+        startVoiceRecognition(username => {
+            startVoiceRecognition(password => {
+                login(username, password);
+            });
+        });
+    });
+
+    elements.mainContainer.style.display = "none";
+    elements.adminPanel.style.display = "none";
+});
+
