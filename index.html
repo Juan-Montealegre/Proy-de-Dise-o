@@ -145,6 +145,7 @@
       </table>
     </div>
   </div>
+     
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
@@ -287,6 +288,8 @@
           for (const key in data) attendance.push(data[key]);
           renderAttendanceTable();
           renderAdminTable();
+          renderUserTable();
+
         });
       }
 
@@ -305,23 +308,68 @@
         attendance.forEach(r => {
           const rol = users[r.usuario]?.role === "admin" ? "Administrador" : "Docente";
           const row = document.createElement("tr");
-          row.innerHTML = `<td>${r.usuario}</td><td>${rol}</td><td>${r.fecha}</td><td>${r.hora}</td>`;
+          row.innerHTML = `
+          <td>${r.usuario}</td>
+          <td>${rol}</td>
+          <td>${r.fecha}</td>
+          <td>${r.hora}</td>
+          <td><button onclick="eliminarAsistencia('${r.usuario}', '${r.fecha}', '${r.hora}')">🗑️</button></td>
+          `;
           elements.adminTable.appendChild(row);
         });
       }
+      function renderUserTable() {
+        if (userRole !== "admin") return;
+        const userTable = document.querySelector("#user-table tbody");
+        userTable.innerHTML = "";
+        for (const usuario in users) {
+          if (usuario === currentUser) continue; // No eliminarse a sí mismo
+          const row = document.createElement("tr");
+          row.innerHTML = `
+          <td>${usuario}</td>
+          <td>${users[usuario].role === "admin" ? "Administrador" : "Docente"}</td>
+          <td><button onclick="eliminarUsuario('${usuario}')">❌ Eliminar</button></td>
+          `;
+          userTable.appendChild(row);
+          }
+          }
+          window.eliminarAsistencia = function (usuario, fecha, hora) {
+            const asistenciaRef = ref(db, "asistencias");
+  onValue(asistenciaRef, snapshot => {
+    const data = snapshot.val();
+    for (const key in data) {
+      const r = data[key];
+      if (r.usuario === usuario && r.fecha === fecha && r.hora === hora) {
+        const deleteRef = ref(db, "asistencias/" + key);
+        deleteRef.remove()
+          .then(() => showSuccess("✅ Asistencia eliminada"))
+          .catch(() => showError("❌ Error al eliminar asistencia"));
+        break;
+      }
+    }
+  }, { onlyOnce: true });
+};
 
-      elements.downloadExcel.addEventListener("click", () => {
-        const datos = attendance.map(r => ({
-          Usuario: r.usuario,
-          Rol: users[r.usuario]?.role === "admin" ? "Administrador" : "Docente",
-          Fecha: r.fecha,
-          Hora: r.hora
-        }));
-        const ws = XLSX.utils.json_to_sheet(datos);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Asistencia");
-        XLSX.writeFile(wb, "asistencia.xlsx");
-      });
+      window.eliminarUsuario = function (usuario) {
+        if (confirm(`¿Eliminar al usuario "${usuario}"?`)) {
+          delete users[usuario];
+          localStorage.setItem("users", JSON.stringify(users));
+          renderUserTable();
+          showSuccess("✅ Usuario eliminado");
+          }
+          };
+          elements.downloadExcel.addEventListener("click", () => {
+            const datos = attendance.map(r => ({
+              Usuario: r.usuario,
+              Rol: users[r.usuario]?.role === "admin" ? "Administrador" : "Docente",
+              Fecha: r.fecha,
+              Hora: r.hora
+              }));
+              const ws = XLSX.utils.json_to_sheet(datos);
+              const wb = XLSX.utils.book_new();
+              XLSX.utils.book_append_sheet(wb, ws, "Asistencia");
+             XLSX.writeFile(wb, "asistencia.xlsx");
+             });
 
       elements.logoutButton?.addEventListener("click", () => {
         currentUser = "";
