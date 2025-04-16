@@ -1,14 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <link type="text/css" rel="stylesheet" href="style.css"/>
-  </head>
-  <body>
-    <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <title>Registro de Asistencia</title>
+  <script type="module" src="https://cdn.sheetjs.com/xlsx-0.20.0/package/xlsx.mjs"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -101,11 +96,6 @@
 
     .admin-container {
       display: none;
-      margin-top: 20px;
-      padding: 20px;
-      background: white;
-      border-radius: 10px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     }
 
     .admin-container h2 {
@@ -119,7 +109,7 @@
     <input type="text" id="username" placeholder="Usuario">
     <input type="password" id="password" placeholder="Contraseña">
     <select id="role-select">
-      <option value="Usuario">Usuario</option>
+      <option value="Usuario">Docente</option>
       <option value="admin">Administrador</option>
     </select>
     <button id="login-button">Iniciar sesión</button>
@@ -146,19 +136,20 @@
 
     <div id="admin-panel">
       <h3>Panel de Administrador</h3>
+      <button id="download-excel">📥 Descargar Excel</button>
       <table id="admin-attendance">
         <thead>
-          <tr><th>Usuario</th><th>Fecha</th><th>Hora</th><th>Acción</th></tr>
+          <tr><th>Usuario</th><th>Rol</th><th>Fecha</th><th>Hora</th></tr>
         </thead>
         <tbody></tbody>
       </table>
     </div>
   </div>
 
-  <!-- Firebase SDK y configuración -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
     import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-database.js";
+    import * as XLSX from "https://cdn.sheetjs.com/xlsx-0.20.0/package/xlsx.mjs";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBQFdu36zRwL8OpoX6883pOuDyqcakfurY",
@@ -190,10 +181,11 @@
         logoutButton: document.getElementById("logout-button"),
         attendanceTable: document.querySelector("#attendance-table tbody"),
         adminPanel: document.getElementById("admin-panel"),
-        adminTable: document.getElementById("admin-attendance"),
+        adminTable: document.querySelector("#admin-attendance tbody"),
         mainContainer: document.querySelector(".container"),
         voiceRegisterButton: document.getElementById("voice-register"),
-        voiceLoginButton: document.getElementById("voice-login")
+        voiceLoginButton: document.getElementById("voice-login"),
+        downloadExcel: document.getElementById("download-excel")
       };
 
       let users = JSON.parse(localStorage.getItem("users")) || {};
@@ -281,15 +273,11 @@
         }
 
         const record = { usuario: currentUser, fecha, hora };
-        guardarAsistenciaEnFirebase(record);
-      });
-
-      function guardarAsistenciaEnFirebase(record) {
         const asistenciaRef = ref(db, "asistencias");
         push(asistenciaRef, record)
-          .then(() => showSuccess("☁️ Asistencia guardada en la nube"))
+          .then(() => showSuccess("✅ Asistencia registrada con éxito y guardada en la nube"))
           .catch(() => showError("❌ Error al guardar en la nube"));
-      }
+      });
 
       function cargarAsistenciaDesdeFirebase() {
         const asistenciaRef = ref(db, "asistencias");
@@ -315,11 +303,25 @@
         if (userRole !== "admin") return;
         elements.adminTable.innerHTML = "";
         attendance.forEach(r => {
+          const rol = users[r.usuario]?.role === "admin" ? "Administrador" : "Docente";
           const row = document.createElement("tr");
-          row.innerHTML = `<td>${r.usuario}</td><td>${r.fecha}</td><td>${r.hora}</td><td>-</td>`;
+          row.innerHTML = `<td>${r.usuario}</td><td>${rol}</td><td>${r.fecha}</td><td>${r.hora}</td>`;
           elements.adminTable.appendChild(row);
         });
       }
+
+      elements.downloadExcel.addEventListener("click", () => {
+        const datos = attendance.map(r => ({
+          Usuario: r.usuario,
+          Rol: users[r.usuario]?.role === "admin" ? "Administrador" : "Docente",
+          Fecha: r.fecha,
+          Hora: r.hora
+        }));
+        const ws = XLSX.utils.json_to_sheet(datos);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Asistencia");
+        XLSX.writeFile(wb, "asistencia.xlsx");
+      });
 
       elements.logoutButton?.addEventListener("click", () => {
         currentUser = "";
@@ -345,14 +347,7 @@
           });
         });
       });
-
-      elements.mainContainer.style.display = "none";
-      elements.adminPanel.style.display = "none";
     });
   </script>
 </body>
-</html>
-
-    <script type="module" src="script.js"></script>
-  </body>
 </html>
