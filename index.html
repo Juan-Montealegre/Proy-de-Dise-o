@@ -18,7 +18,7 @@
       padding: 0;
     }
 
-    .container, .admin-container, #login-form {
+    .container, #login-form {
       margin: 50px auto;
       padding: 20px;
       background: white;
@@ -29,20 +29,25 @@
       color: #000;
     }
 
+    h2, h3 {
+      color: #b71c1c;
+    }
+
     button {
       margin-top: 15px;
-      padding: 12px 20px;
+      padding: 15px 25px;
       border: none;
-      background: #ff0202;
+      background: #d32f2f;
       color: white;
       font-size: 16px;
       cursor: pointer;
-      border-radius: 5px;
-      transition: background 0.3s;
+      border-radius: 6px;
+      transition: background 0.3s, transform 0.2s;
     }
 
     button:hover {
       background: #000000;
+      transform: scale(1.05);
     }
 
     input, select {
@@ -80,7 +85,6 @@
       background: white;
       color: black;
       border-radius: 5px;
-      overflow: hidden;
     }
 
     th, td {
@@ -90,7 +94,7 @@
     }
 
     th {
-      background: #ff0202;
+      background: #d32f2f;
       color: white;
     }
 
@@ -98,22 +102,47 @@
       display: none;
     }
 
-    .admin-container h2 {
-      color: #ff0202;
+    #loader {
+      font-weight: bold;
+      margin-top: 15px;
+      color: green;
+      display: none;
+    }
+
+    .flash {
+      animation: flash 0.3s ease-in-out;
+    }
+
+    @keyframes flash {
+      0% { background-color: #d32f2f; }
+      100% { background-color: #000; }
+    }
+
+    .delete-btn {
+      background-color: #e53935;
+      border: none;
+      color: white;
+      padding: 6px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    .delete-btn:hover {
+      background-color: #b71c1c;
     }
   </style>
 </head>
 <body>
   <div id="login-form">
-    <h2>Iniciar sesión / Registrarse</h2>
+    <h2>🎓 Registro de Asistencia</h2>
     <input type="text" id="username" placeholder="Usuario">
     <input type="password" id="password" placeholder="Contraseña">
     <select id="role-select">
       <option value="Usuario">Docente</option>
       <option value="admin">Administrador</option>
     </select>
-    <button id="login-button">Iniciar sesión</button>
-    <button id="register-button">Registrarse</button>
+    <button id="login-button">🔓 Iniciar sesión</button>
+    <button id="register-button">📝 Registrarse</button>
     <button id="voice-login">🎤 Iniciar con voz</button>
     <button id="voice-register">🎤 Registrar con voz</button>
     <p id="mensaje"></p>
@@ -122,34 +151,30 @@
 
   <div class="container" style="display:none;">
     <h2>Bienvenido</h2>
-    <video id="video" autoplay></video><br>
-    <button id="capture">Registrar Asistencia</button>
-    <button id="logout-button">Cerrar sesión</button>
+    <div class="video-container"><video id="video" autoplay></video></div>
+    <button id="capture">✅ Registrar Asistencia</button>
+    <p id="loader">Registrando asistencia...</p>
+    <button id="logout-button">⏏️ Cerrar sesión</button>
 
-    <h3>Asistencia registrada</h3>
+    <h3>📊 Asistencia registrada</h3>
     <table id="attendance-table">
-      <thead>
-        <tr><th>Usuario</th><th>Fecha</th><th>Hora</th></tr>
-      </thead>
+      <thead><tr><th>Usuario</th><th>Fecha</th><th>Hora</th></tr></thead>
       <tbody></tbody>
     </table>
 
-    <div id="admin-panel">
-      <h3>Panel de Administrador</h3>
+    <div id="admin-panel" class="admin-container">
+      <h3>🛠 Panel de Administrador</h3>
       <button id="download-excel">📥 Descargar Excel</button>
       <table id="admin-attendance">
-        <thead>
-          <tr><th>Usuario</th><th>Rol</th><th>Fecha</th><th>Hora</th></tr>
-        </thead>
+        <thead><tr><th>Usuario</th><th>Rol</th><th>Fecha</th><th>Hora</th><th>Acción</th></tr></thead>
         <tbody></tbody>
       </table>
     </div>
   </div>
-     
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-    import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-database.js";
+    import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-database.js";
     import * as XLSX from "https://cdn.sheetjs.com/xlsx-0.20.0/package/xlsx.mjs";
 
     const firebaseConfig = {
@@ -157,7 +182,7 @@
       authDomain: "asistencia-docentes-9de71.firebaseapp.com",
       databaseURL: "https://asistencia-docentes-9de71-default-rtdb.firebaseio.com",
       projectId: "asistencia-docentes-9de71",
-      storageBucket: "asistencia-docentes-9de71.firebasestorage.app",
+      storageBucket: "asistencia-docentes-9de71.appspot.com",
       messagingSenderId: "933641363169",
       appId: "1:933641363169:web:5001d5ad0a37a0e4e8e1a0",
       measurementId: "G-HYF7KLQ5NZ"
@@ -165,236 +190,198 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-    window.firebaseDB = db;
 
-    document.addEventListener("DOMContentLoaded", async () => {
-      const elements = {
-        video: document.getElementById("video"),
-        captureButton: document.getElementById("capture"),
-        errorMessage: document.getElementById("mensaje"),
-        feedbackMessage: document.getElementById("feedback"),
-        loginForm: document.getElementById("login-form"),
-        usernameInput: document.getElementById("username"),
-        passwordInput: document.getElementById("password"),
-        roleSelect: document.getElementById("role-select"),
-        loginButton: document.getElementById("login-button"),
-        registerButton: document.getElementById("register-button"),
-        logoutButton: document.getElementById("logout-button"),
-        attendanceTable: document.querySelector("#attendance-table tbody"),
-        adminPanel: document.getElementById("admin-panel"),
-        adminTable: document.querySelector("#admin-attendance tbody"),
-        mainContainer: document.querySelector(".container"),
-        voiceRegisterButton: document.getElementById("voice-register"),
-        voiceLoginButton: document.getElementById("voice-login"),
-        downloadExcel: document.getElementById("download-excel")
+    document.addEventListener("DOMContentLoaded", () => {
+      const $ = id => document.getElementById(id);
+      const users = JSON.parse(localStorage.getItem("users")) || {};
+      let currentUser = "", userRole = "", stream = null;
+
+      const video = $("video");
+      const feedback = $("feedback");
+      const mensaje = $("mensaje");
+      const loader = $("loader");
+
+      // Guardaremos las asistencias cargadas hoy con sus keys para evitar duplicados y permitir eliminación
+      let attendanceRecords = {};
+
+      const showError = msg => { mensaje.textContent = `⚠️ ${msg}`; mensaje.style.color = "red"; };
+      const showSuccess = msg => {
+        feedback.textContent = msg;
+        feedback.style.color = "green";
+        setTimeout(() => feedback.textContent = "", 3000);
       };
 
-      let users = JSON.parse(localStorage.getItem("users")) || {};
-      let attendance = [];
-      let currentUser = "";
-      let userRole = "";
-      let stream = null;
-      const successSound = new Audio("https://www.soundjay.com/buttons/sounds/button-3.mp3");
-
-      function showError(message) {
-        elements.errorMessage.textContent = `⚠️ ${message}`;
-        elements.errorMessage.style.color = "red";
-      }
-
-      function showSuccess(message) {
-        elements.feedbackMessage.textContent = message;
-        elements.feedbackMessage.style.color = "green";
-        successSound.play();
-        setTimeout(() => elements.feedbackMessage.textContent = "", 3000);
-      }
-
-      async function startCamera() {
+      const startCamera = async () => {
         try {
           stream = await navigator.mediaDevices.getUserMedia({ video: true });
-          elements.video.srcObject = stream;
-        } catch {
-          showError("No se pudo acceder a la cámara.");
-        }
-      }
+          video.srcObject = stream;
+        } catch { showError("No se pudo acceder a la cámara."); }
+      };
 
-      function stopCamera() {
-        if (stream) stream.getTracks().forEach(track => track.stop());
-      }
+      const stopCamera = () => stream?.getTracks().forEach(track => track.stop());
 
-      function startVoiceRecognition(callback) {
-        try {
-          const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-          recognition.lang = "es-ES";
-          recognition.start();
-          recognition.onresult = e => callback(e.results[0][0].transcript.trim());
-          recognition.onerror = () => showError("Error de reconocimiento de voz.");
-        } catch {
-          showError("Navegador no soporta reconocimiento de voz.");
-        }
-      }
-
-      function login(username, password) {
-        if (users[username]?.password === password) {
-          currentUser = username;
-          userRole = users[username].role;
-          elements.loginForm.style.display = "none";
-          elements.mainContainer.style.display = "block";
-          elements.adminPanel.style.display = userRole === "admin" ? "block" : "none";
+      const login = (user, pass) => {
+        if (users[user]?.password === pass) {
+          currentUser = user;
+          userRole = users[user].role;
+          $("login-form").style.display = "none";
+          document.querySelector(".container").style.display = "block";
+          $("admin-panel").style.display = userRole === "admin" ? "block" : "none";
           startCamera();
-          cargarAsistenciaDesdeFirebase();
-        } else {
-          showError("Credenciales incorrectas");
-        }
-      }
+          cargarAsistencia();
+        } else showError("Credenciales incorrectas");
+      };
 
-      function register(username, password, role) {
-        if (!username || !password) return showError("Usuario y contraseña requeridos");
-        if (users[username]) return showError("Usuario ya registrado");
-        users[username] = { password, role };
+      const register = (user, pass, role) => {
+        if (!user || !pass) return showError("Usuario y contraseña requeridos");
+        if (users[user]) return showError("Usuario ya existe");
+        users[user] = { password: pass, role };
         localStorage.setItem("users", JSON.stringify(users));
-        showSuccess("✅ Usuario registrado");
-      }
+        showSuccess("Usuario registrado con éxito");
+      };
 
-      elements.loginButton.addEventListener("click", () => {
-        login(elements.usernameInput.value.trim(), elements.passwordInput.value.trim());
-      });
+      const hoyFecha = () => new Date().toISOString().slice(0, 10); // yyyy-mm-dd
 
-      elements.registerButton.addEventListener("click", () => {
-        register(elements.usernameInput.value.trim(), elements.passwordInput.value.trim(), elements.roleSelect.value);
-      });
+      const cargarAsistencia = () => {
+        const attendanceRef = ref(db, "asistencias");
+        onValue(attendanceRef, (snapshot) => {
+          attendanceRecords = {};
+          const data = snapshot.val() || {};
+          // Limpiar tablas
+          $("attendance-table").querySelector("tbody").innerHTML = "";
+          $("admin-attendance").querySelector("tbody").innerHTML = "";
 
-      elements.captureButton.addEventListener("click", () => {
-        if (!currentUser) return showError("Inicia sesión para registrar asistencia");
-        const now = new Date();
-        const fecha = now.toLocaleDateString();
-        const hora = now.toLocaleTimeString();
+          Object.entries(data).forEach(([key, { user, role, date, time }]) => {
+            if (date === hoyFecha()) {
+              attendanceRecords[`${user}_${date}`] = key;
 
-        if (attendance.some(r => r.usuario === currentUser && r.fecha === fecha)) {
-          return showError("Ya registraste asistencia hoy");
+              // Para todos los usuarios mostramos en tabla principal
+              const row = document.createElement("tr");
+              row.innerHTML = `<td>${user}</td><td>${date}</td><td>${time}</td>`;
+              $("attendance-table").querySelector("tbody").appendChild(row);
+
+              // Si admin, mostramos tabla con acciones
+              if (userRole === "admin") {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `<td>${user}</td><td>${role}</td><td>${date}</td><td>${time}</td>
+                  <td><button class="delete-btn" data-key="${key}">Eliminar</button></td>`;
+                $("admin-attendance").querySelector("tbody").appendChild(tr);
+              }
+            }
+          });
+
+          if (userRole === "admin") {
+            // Agregar evento click a botones eliminar
+            document.querySelectorAll(".delete-btn").forEach(btn => {
+              btn.addEventListener("click", async e => {
+                const key = e.target.dataset.key;
+                if (confirm("¿Eliminar esta asistencia?")) {
+                  await remove(ref(db, `asistencias/${key}`));
+                  showSuccess("Asistencia eliminada");
+                }
+              });
+            });
+          }
+        });
+      };
+
+      const registrarAsistencia = async () => {
+        if (attendanceRecords[`${currentUser}_${hoyFecha()}`]) {
+          showError("Ya registraste tu asistencia hoy.");
+          return;
         }
+        loader.style.display = "block";
 
-        const record = { usuario: currentUser, fecha, hora };
-        const asistenciaRef = ref(db, "asistencias");
-        push(asistenciaRef, record)
-          .then(() => showSuccess("✅ Asistencia registrada con éxito y guardada en la nube"))
-          .catch(() => showError("❌ Error al guardar en la nube"));
-      });
+        const hora = new Date().toLocaleTimeString();
 
-      function cargarAsistenciaDesdeFirebase() {
-        const asistenciaRef = ref(db, "asistencias");
-        onValue(asistenciaRef, snapshot => {
-          const data = snapshot.val();
-          attendance = [];
-          for (const key in data) attendance.push(data[key]);
-          renderAttendanceTable();
-          renderAdminTable();
-          renderUserTable();
+        // Capturar imagen de video en canvas y convertir a base64 (opcional para guardarlo)
+        const canvas = document.createElement("canvas");
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const imageBase64 = canvas.toDataURL("image/png");
 
-        });
-      }
+        try {
+          await push(ref(db, "asistencias"), {
+            user: currentUser,
+            role: userRole,
+            date: hoyFecha(),
+            time: hora,
+            photo: imageBase64
+          });
+          showSuccess("Asistencia registrada con éxito!");
+        } catch {
+          showError("Error al registrar asistencia.");
+        }
+        loader.style.display = "none";
+      };
 
-      function renderAttendanceTable() {
-        elements.attendanceTable.innerHTML = "";
-        attendance.filter(r => r.usuario === currentUser).forEach(r => {
-          const row = document.createElement("tr");
-          row.innerHTML = `<td>${r.usuario}</td><td>${r.fecha}</td><td>${r.hora}</td>`;
-          elements.attendanceTable.appendChild(row);
-        });
-      }
-
-      function renderAdminTable() {
-        if (userRole !== "admin") return;
-        elements.adminTable.innerHTML = "";
-        attendance.forEach(r => {
-          const rol = users[r.usuario]?.role === "admin" ? "Administrador" : "Docente";
-          const row = document.createElement("tr");
-          row.innerHTML = `
-          <td>${r.usuario}</td>
-          <td>${rol}</td>
-          <td>${r.fecha}</td>
-          <td>${r.hora}</td>
-          <td><button onclick="eliminarAsistencia('${r.usuario}', '${r.fecha}', '${r.hora}')">🗑️</button></td>
-          `;
-          elements.adminTable.appendChild(row);
-        });
-      }
-      function renderUserTable() {
-        if (userRole !== "admin") return;
-        const userTable = document.querySelector("#user-table tbody");
-        userTable.innerHTML = "";
-        for (const usuario in users) {
-          if (usuario === currentUser) continue; // No eliminarse a sí mismo
-          const row = document.createElement("tr");
-          row.innerHTML = `
-          <td>${usuario}</td>
-          <td>${users[usuario].role === "admin" ? "Administrador" : "Docente"}</td>
-          <td><button onclick="eliminarUsuario('${usuario}')">❌ Eliminar</button></td>
-          `;
-          userTable.appendChild(row);
-          }
-          }
-          window.eliminarAsistencia = function (usuario, fecha, hora) {
-            const asistenciaRef = ref(db, "asistencias");
-  onValue(asistenciaRef, snapshot => {
-    const data = snapshot.val();
-    for (const key in data) {
-      const r = data[key];
-      if (r.usuario === usuario && r.fecha === fecha && r.hora === hora) {
-        const deleteRef = ref(db, "asistencias/" + key);
-        deleteRef.remove()
-          .then(() => showSuccess("✅ Asistencia eliminada"))
-          .catch(() => showError("❌ Error al eliminar asistencia"));
-        break;
-      }
-    }
-  }, { onlyOnce: true });
-};
-
-      window.eliminarUsuario = function (usuario) {
-        if (confirm(`¿Eliminar al usuario "${usuario}"?`)) {
-          delete users[usuario];
-          localStorage.setItem("users", JSON.stringify(users));
-          renderUserTable();
-          showSuccess("✅ Usuario eliminado");
-          }
-          };
-          elements.downloadExcel.addEventListener("click", () => {
-            const datos = attendance.map(r => ({
-              Usuario: r.usuario,
-              Rol: users[r.usuario]?.role === "admin" ? "Administrador" : "Docente",
-              Fecha: r.fecha,
-              Hora: r.hora
-              }));
-              const ws = XLSX.utils.json_to_sheet(datos);
-              const wb = XLSX.utils.book_new();
-              XLSX.utils.book_append_sheet(wb, ws, "Asistencia");
-             XLSX.writeFile(wb, "asistencia.xlsx");
-             });
-
-      elements.logoutButton?.addEventListener("click", () => {
+      const logout = () => {
+        stopCamera();
         currentUser = "";
         userRole = "";
-        elements.loginForm.style.display = "block";
-        elements.mainContainer.style.display = "none";
-        elements.adminPanel.style.display = "none";
-        stopCamera();
-      });
+        attendanceRecords = {};
+        $("login-form").style.display = "block";
+        document.querySelector(".container").style.display = "none";
+        mensaje.textContent = "";
+        feedback.textContent = "";
+        $("username").value = "";
+        $("password").value = "";
+      };
 
-      elements.voiceRegisterButton.addEventListener("click", () => {
-        startVoiceRecognition(username => {
-          startVoiceRecognition(password => {
-            register(username, password, elements.roleSelect.value);
-          });
-        });
-      });
+      const descargarExcel = () => {
+        const table = $("admin-attendance");
+        const wb = XLSX.utils.table_to_book(table, { sheet: "Asistencia" });
+        XLSX.writeFile(wb, `Asistencia_${hoyFecha()}.xlsx`);
+      };
 
-      elements.voiceLoginButton.addEventListener("click", () => {
-        startVoiceRecognition(username => {
-          startVoiceRecognition(password => {
-            login(username, password);
-          });
+      // Voz para login/registro (simplificado)
+      const reconocimientoVoz = (callback) => {
+        if (!('webkitSpeechRecognition' in window)) {
+          alert("Tu navegador no soporta reconocimiento de voz.");
+          return;
+        }
+        const recognition = new webkitSpeechRecognition();
+        recognition.lang = "es-ES";
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 1;
+        recognition.start();
+
+        recognition.onresult = (event) => {
+          const texto = event.results[0][0].transcript.toLowerCase();
+          callback(texto);
+        };
+        recognition.onerror = (e) => alert("Error de voz: " + e.error);
+      };
+
+      $("login-button").onclick = () => {
+        login($("username").value.trim(), $("password").value.trim());
+      };
+
+      $("register-button").onclick = () => {
+        register($("username").value.trim(), $("password").value.trim(), $("role-select").value);
+      };
+
+      $("logout-button").onclick = logout;
+
+      $("capture").onclick = registrarAsistencia;
+
+      $("download-excel").onclick = descargarExcel;
+
+      $("voice-login").onclick = () => {
+        reconocimientoVoz(texto => {
+          const [user, pass] = texto.split(" ");
+          login(user, pass);
         });
-      });
+      };
+
+      $("voice-register").onclick = () => {
+        reconocimientoVoz(texto => {
+          const [user, pass] = texto.split(" ");
+          register(user, pass, $("role-select").value);
+        });
+      };
     });
   </script>
 </body>
