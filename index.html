@@ -5,152 +5,160 @@
   </head>
   <body>
     <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <link type="text/css" rel="stylesheet" href="style.css"/>
-  </head>
-  <body>
-    <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
   <title>Registro de Asistencia</title>
   <script type="module" src="https://cdn.sheetjs.com/xlsx-0.20.0/package/xlsx.mjs"></script>
   <style>
-body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  text-align: center;
-  background:
-    linear-gradient(to bottom, rgba(0, 0, 0, 0.8), rgba(204, 0, 0, 0.6), rgba(0, 0, 0, 0.8)),
-    url("https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Escudo_de_la_Universidad_Libre_de_Colombia.svg/2048px-Escudo_de_la_Universidad_Libre_de_Colombia.svg.png")
-    no-repeat center center fixed;
-  background-size: cover;
-  color: #fff;
-  margin: 0;
-  padding: 0;
-}
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      text-align: center;
+      background:
+        linear-gradient(to bottom, rgba(0, 0, 0, 0.8), rgba(204, 0, 0, 0.6), rgba(0, 0, 0, 0.8)),
+        url("https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Escudo_de_la_Universidad_Libre_de_Colombia.svg/2048px-Escudo_de_la_Universidad_Libre_de_Colombia.svg.png")
+        no-repeat center center fixed;
+      background-size: cover;
+      color: #fff;
+      margin: 0;
+      padding: 0;
+    }
 
-.container, #login-form {
-  margin: 60px auto;
-  padding: 30px;
-  background: #ffffffee;
-  width: 90%;
-  max-width: 600px;
-  border-radius: 15px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-  color: #222;
-}
+    .container, #login-form {
+      margin: 60px auto;
+      padding: 30px;
+      background: #ffffffee;
+      width: 90%;
+      max-width: 600px;
+      border-radius: 15px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+      color: #222;
+    }
 
-h2, h3 {
-  color: #c62828;
-  margin-bottom: 20px;
-  font-weight: bold;
-}
+    h2, h3 {
+      color: #c62828;
+      margin-bottom: 20px;
+      font-weight: bold;
+    }
 
-button {
-  margin-top: 20px;
-  padding: 14px 28px;
-  border: none;
-  background: #c62828;
-  color: white;
-  font-size: 16px;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-}
+    button {
+      margin-top: 20px;
+      padding: 14px 28px;
+      border: none;
+      background: #c62828;
+      color: white;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
 
-button:hover {
-  background: #000000;
-  transform: scale(1.05);
-}
+    button:hover {
+      background: #000000;
+      transform: scale(1.05);
+    }
 
-input, select {
-  width: 95%;
-  padding: 12px;
-  margin-top: 12px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  font-size: 16px;
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
-}
+    input, select {
+      width: 95%;
+      padding: 12px;
+      margin-top: 12px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
 
-.video-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  max-width: 340px;
-  height: 240px;
-  margin: 25px auto;
-  background: black;
-  border-radius: 15px;
-  overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-}
+    .video-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      max-width: 340px;
+      height: 240px;
+      margin: 25px auto;
+      background: black;
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    }
 
-#video {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transform: scaleX(-1);
-}
+    #video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scaleX(-1);
+    }
 
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 30px;
-  background: #f9f9f9;
-  color: #333;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-}
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 30px;
+      background: #f9f9f9;
+      color: #333;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
 
-th, td {
-  border: 1px solid #ddd;
-  padding: 12px;
-  text-align: center;
-}
+    th, td {
+      border: 1px solid #ddd;
+      padding: 12px;
+      text-align: center;
+    }
 
-th {
-  background: #c62828;
-  color: white;
-}
+    th {
+      background: #c62828;
+      color: white;
+    }
 
-.admin-container {
-  display: none;
-}
+    .admin-container {
+      display: none;
+    }
 
-#loader {
-  font-weight: bold;
-  margin-top: 20px;
-  color: #2e7d32;
-  display: none;
-}
+    #loader {
+      font-weight: bold;
+      margin-top: 20px;
+      color: #2e7d32;
+      display: none;
+    }
 
-.flash {
-  animation: flash 0.3s ease-in-out;
-}
+    .flash {
+      animation: flash 0.3s ease-in-out;
+    }
 
-@keyframes flash {
-  0% { background-color: #c62828; }
-  100% { background-color: #000; }
-}
+    @keyframes flash {
+      0% { background-color: #c62828; }
+      100% { background-color: #000; }
+    }
 
-.delete-btn {
-  background-color: #e53935;
-  border: none;
-  color: white;
-  padding: 8px 12px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
+    .delete-btn {
+      background-color: #e53935;
+      border: none;
+      color: white;
+      padding: 8px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
 
-.delete-btn:hover {
-  background-color: #b71c1c;
-}
+    .delete-btn:hover {
+      background-color: #b71c1c;
+    }
+
+    #message-popup {
+      position: fixed;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 12px 20px;
+      background-color: rgba(255, 0, 0, 0.8);
+      color: white;
+      border-radius: 8px;
+      font-size: 16px;
+      display: none;
+      z-index: 9999;
+    }
 
   </style>
 </head>
@@ -263,11 +271,6 @@ th {
           startCamera();
           cargarAsistencia();
           mensaje.textContent = "";
-
-          // Actualizar breadcrumb
-          const breadcrumb = ["Página principal", "Inicio de sesión", "Registro de Asistencia"];
-          if (userRole === "admin") breadcrumb.push("Panel de Administrador");
-          updateBreadcrumb(breadcrumb);
         } else {
           showError("Credenciales incorrectas");
         }
@@ -286,9 +289,6 @@ th {
         users[user] = { password: pass, role };
         localStorage.setItem(usersKey, JSON.stringify(users));
         showSuccess("Usuario registrado con éxito");
-
-        // Actualizar breadcrumb
-        updateBreadcrumb(["Página principal", "Registro"]);
       };
 
       const hoyFecha = () => new Date().toISOString().slice(0, 10);
@@ -336,11 +336,30 @@ th {
         });
       };
 
-      // Función breadcrumb
-      const updateBreadcrumb = (pathArray) => {
-        const breadcrumb = document.getElementById("breadcrumb");
-        breadcrumb.innerHTML = pathArray.join(" &gt; ");
+      // Función para descargar el Excel
+      $("download-excel").onclick = () => {
+        const wb = XLSX.utils.table_to_book($("admin-attendance"));
+        XLSX.writeFile(wb, "asistencias.xlsx");
       };
+
+      // Mostrar mensaje de "regístrese o inicie sesión"
+      const messagePopup = document.createElement('div');
+      messagePopup.id = 'message-popup';
+      document.body.appendChild(messagePopup);
+
+      // Excepción: Si se hace clic dentro del formulario de login o los botones, no mostrar el mensaje
+      const formulario = $("login-form");
+      formulario.addEventListener('click', (event) => event.stopPropagation());
+
+      document.body.addEventListener('click', () => {
+        if (!currentUser) {
+          messagePopup.style.display = 'block';
+          messagePopup.textContent = '¡Regístrese o inicie sesión!';
+          setTimeout(() => {
+            messagePopup.style.display = 'none';
+          }, 3000);
+        }
+      });
 
       $("login-button").onclick = () => {
         login($("username").value.trim(), $("password").value.trim());
@@ -358,7 +377,6 @@ th {
         document.querySelector(".container").style.display = "none";
         mensaje.textContent = "";
         feedback.textContent = "";
-        updateBreadcrumb(["Página principal"]);
       };
 
       $("capture").onclick = async () => {
@@ -385,7 +403,6 @@ th {
   </script>
 </body>
 </html>
-
 
     <script type="module" src="script.js"></script>
   </body>
