@@ -1,142 +1,167 @@
 <!DOCTYPE html>
+<html lang="en">
+  <head>
+    <link type="text/css" rel="stylesheet" href="style.css"/>
+  </head>
+  <body>
+    <!DOCTYPE html>
+<html lang="en">
+  <head>
+    <link type="text/css" rel="stylesheet" href="style.css"/>
+  </head>
+  <body>
+    <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Registro de Asistencia</title>
   <script type="module" src="https://cdn.sheetjs.com/xlsx-0.20.0/package/xlsx.mjs"></script>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      background:
-        linear-gradient(to bottom, rgba(0, 0, 0, 0.9), rgba(255, 0, 0, 0.7), rgba(0, 0, 0, 0.9)),
-        url("https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Escudo_de_la_Universidad_Libre_de_Colombia.svg/2048px-Escudo_de_la_Universidad_Libre_de_Colombia.svg.png")
-        no-repeat center center fixed;
-      background-size: cover;
-      color: #fff;
-      margin: 0;
-      padding: 0;
-    }
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  text-align: center;
+  background:
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.8), rgba(204, 0, 0, 0.6), rgba(0, 0, 0, 0.8)),
+    url("https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Escudo_de_la_Universidad_Libre_de_Colombia.svg/2048px-Escudo_de_la_Universidad_Libre_de_Colombia.svg.png")
+    no-repeat center center fixed;
+  background-size: cover;
+  color: #fff;
+  margin: 0;
+  padding: 0;
+}
 
-    .container, #login-form {
-      margin: 50px auto;
-      padding: 20px;
-      background: white;
-      width: 90%;
-      max-width: 600px;
-      border-radius: 10px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-      color: #000;
-    }
+.container, #login-form {
+  margin: 60px auto;
+  padding: 30px;
+  background: #ffffffee;
+  width: 90%;
+  max-width: 600px;
+  border-radius: 15px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  color: #222;
+}
 
-    h2, h3 {
-      color: #b71c1c;
-    }
+h2, h3 {
+  color: #c62828;
+  margin-bottom: 20px;
+  font-weight: bold;
+}
 
-    button {
-      margin-top: 15px;
-      padding: 15px 25px;
-      border: none;
-      background: #d32f2f;
-      color: white;
-      font-size: 16px;
-      cursor: pointer;
-      border-radius: 6px;
-      transition: background 0.3s, transform 0.2s;
-    }
+button {
+  margin-top: 20px;
+  padding: 14px 28px;
+  border: none;
+  background: #c62828;
+  color: white;
+  font-size: 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
 
-    button:hover {
-      background: #000000;
-      transform: scale(1.05);
-    }
+button:hover {
+  background: #000000;
+  transform: scale(1.05);
+}
 
-    input, select {
-      width: 90%;
-      padding: 10px;
-      margin-top: 10px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-      font-size: 16px;
-    }
+input, select {
+  width: 95%;
+  padding: 12px;
+  margin-top: 12px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+}
 
-    .video-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      width: 320px;
-      height: 240px;
-      margin: 20px auto;
-      background: black;
-      border-radius: 10px;
-      overflow: hidden;
-    }
+.video-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  max-width: 340px;
+  height: 240px;
+  margin: 25px auto;
+  background: black;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
 
-    #video {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      transform: scaleX(-1);
-    }
+#video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scaleX(-1);
+}
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-      background: white;
-      color: black;
-      border-radius: 5px;
-    }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 30px;
+  background: #f9f9f9;
+  color: #333;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
 
-    th, td {
-      border: 1px solid #ddd;
-      padding: 10px;
-      text-align: center;
-    }
+th, td {
+  border: 1px solid #ddd;
+  padding: 12px;
+  text-align: center;
+}
 
-    th {
-      background: #d32f2f;
-      color: white;
-    }
+th {
+  background: #c62828;
+  color: white;
+}
 
-    .admin-container {
-      display: none;
-    }
+.admin-container {
+  display: none;
+}
 
-    #loader {
-      font-weight: bold;
-      margin-top: 15px;
-      color: green;
-      display: none;
-    }
+#loader {
+  font-weight: bold;
+  margin-top: 20px;
+  color: #2e7d32;
+  display: none;
+}
 
-    .flash {
-      animation: flash 0.3s ease-in-out;
-    }
+.flash {
+  animation: flash 0.3s ease-in-out;
+}
 
-    @keyframes flash {
-      0% { background-color: #d32f2f; }
-      100% { background-color: #000; }
-    }
+@keyframes flash {
+  0% { background-color: #c62828; }
+  100% { background-color: #000; }
+}
 
-    .delete-btn {
-      background-color: #e53935;
-      border: none;
-      color: white;
-      padding: 6px 10px;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: background-color 0.3s;
-    }
-    .delete-btn:hover {
-      background-color: #b71c1c;
-    }
+.delete-btn {
+  background-color: #e53935;
+  border: none;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.delete-btn:hover {
+  background-color: #b71c1c;
+}
+
   </style>
 </head>
 <body>
+  <!-- Breadcrumb -->
+  <nav id="breadcrumb" style="margin: 15px auto; width: 90%; max-width: 600px; font-size: 14px; color: white; text-align: left;"></nav>
+
   <div id="login-form">
     <h2>🎓 Registro de Asistencia</h2>
-    <input type="text" id="username" placeholder="Usuario">
-    <input type="password" id="password" placeholder="Contraseña">
+    <input type="text" id="username" placeholder="Usuario" />
+    <input type="password" id="password" placeholder="Contraseña" />
     <select id="role-select">
       <option value="Usuario">Docente</option>
       <option value="admin">Administrador</option>
@@ -193,7 +218,8 @@
 
     document.addEventListener("DOMContentLoaded", () => {
       const $ = id => document.getElementById(id);
-      const users = JSON.parse(localStorage.getItem("users")) || {};
+      const usersKey = "users";
+
       let currentUser = "", userRole = "", stream = null;
 
       const video = $("video");
@@ -201,26 +227,33 @@
       const mensaje = $("mensaje");
       const loader = $("loader");
 
-      // Guardaremos las asistencias cargadas hoy con sus keys para evitar duplicados y permitir eliminación
       let attendanceRecords = {};
 
-      const showError = msg => { mensaje.textContent = `⚠️ ${msg}`; mensaje.style.color = "red"; };
+      const showError = msg => {
+        mensaje.textContent = `⚠️ ${msg}`;
+        mensaje.style.color = "red";
+      };
       const showSuccess = msg => {
         feedback.textContent = msg;
         feedback.style.color = "green";
         setTimeout(() => feedback.textContent = "", 3000);
       };
 
+      const getUsers = () => JSON.parse(localStorage.getItem(usersKey)) || {};
+
       const startCamera = async () => {
         try {
           stream = await navigator.mediaDevices.getUserMedia({ video: true });
           video.srcObject = stream;
-        } catch { showError("No se pudo acceder a la cámara."); }
+        } catch {
+          showError("No se pudo acceder a la cámara.");
+        }
       };
 
       const stopCamera = () => stream?.getTracks().forEach(track => track.stop());
 
       const login = (user, pass) => {
+        const users = getUsers();
         if (users[user]?.password === pass) {
           currentUser = user;
           userRole = users[user].role;
@@ -229,130 +262,84 @@
           $("admin-panel").style.display = userRole === "admin" ? "block" : "none";
           startCamera();
           cargarAsistencia();
-        } else showError("Credenciales incorrectas");
+          mensaje.textContent = "";
+
+          // Actualizar breadcrumb
+          const breadcrumb = ["Página principal", "Inicio de sesión", "Registro de Asistencia"];
+          if (userRole === "admin") breadcrumb.push("Panel de Administrador");
+          updateBreadcrumb(breadcrumb);
+        } else {
+          showError("Credenciales incorrectas");
+        }
       };
 
       const register = (user, pass, role) => {
-        if (!user || !pass) return showError("Usuario y contraseña requeridos");
-        if (users[user]) return showError("Usuario ya existe");
+        if (!user || !pass) {
+          showError("Usuario y contraseña requeridos");
+          return;
+        }
+        const users = getUsers();
+        if (users[user]) {
+          showError("Usuario ya existe");
+          return;
+        }
         users[user] = { password: pass, role };
-        localStorage.setItem("users", JSON.stringify(users));
+        localStorage.setItem(usersKey, JSON.stringify(users));
         showSuccess("Usuario registrado con éxito");
+
+        // Actualizar breadcrumb
+        updateBreadcrumb(["Página principal", "Registro"]);
       };
 
-      const hoyFecha = () => new Date().toISOString().slice(0, 10); // yyyy-mm-dd
+      const hoyFecha = () => new Date().toISOString().slice(0, 10);
 
       const cargarAsistencia = () => {
         const attendanceRef = ref(db, "asistencias");
         onValue(attendanceRef, (snapshot) => {
           attendanceRecords = {};
           const data = snapshot.val() || {};
-          // Limpiar tablas
           $("attendance-table").querySelector("tbody").innerHTML = "";
           $("admin-attendance").querySelector("tbody").innerHTML = "";
 
           Object.entries(data).forEach(([key, { user, role, date, time }]) => {
             if (date === hoyFecha()) {
-              attendanceRecords[`${user}_${date}`] = key;
+              // Solo mostrar asistencia del día
+              const tr = document.createElement("tr");
+              tr.innerHTML = `<td>${user}</td><td>${date}</td><td>${time}</td>`;
+              $("attendance-table").querySelector("tbody").appendChild(tr);
 
-              // Para todos los usuarios mostramos en tabla principal
-              const row = document.createElement("tr");
-              row.innerHTML = `<td>${user}</td><td>${date}</td><td>${time}</td>`;
-              $("attendance-table").querySelector("tbody").appendChild(row);
-
-              // Si admin, mostramos tabla con acciones
               if (userRole === "admin") {
-                const tr = document.createElement("tr");
-                tr.innerHTML = `<td>${user}</td><td>${role}</td><td>${date}</td><td>${time}</td>
-                  <td><button class="delete-btn" data-key="${key}">Eliminar</button></td>`;
-                $("admin-attendance").querySelector("tbody").appendChild(tr);
+                const adminTr = document.createElement("tr");
+                adminTr.innerHTML = `
+                  <td>${user}</td>
+                  <td>${role}</td>
+                  <td>${date}</td>
+                  <td>${time}</td>
+                  <td><button class="delete-btn" data-key="${key}">Eliminar</button></td>
+                `;
+                $("admin-attendance").querySelector("tbody").appendChild(adminTr);
               }
+              attendanceRecords[user] = true;
             }
           });
 
+          // Attach delete handlers if admin
           if (userRole === "admin") {
-            // Agregar evento click a botones eliminar
             document.querySelectorAll(".delete-btn").forEach(btn => {
-              btn.addEventListener("click", async e => {
-                const key = e.target.dataset.key;
-                if (confirm("¿Eliminar esta asistencia?")) {
-                  await remove(ref(db, `asistencias/${key}`));
-                  showSuccess("Asistencia eliminada");
+              btn.onclick = () => {
+                if (confirm("¿Eliminar este registro?")) {
+                  remove(ref(db, `asistencias/${btn.dataset.key}`));
                 }
-              });
+              };
             });
           }
         });
       };
 
-      const registrarAsistencia = async () => {
-        if (attendanceRecords[`${currentUser}_${hoyFecha()}`]) {
-          showError("Ya registraste tu asistencia hoy.");
-          return;
-        }
-        loader.style.display = "block";
-
-        const hora = new Date().toLocaleTimeString();
-
-        // Capturar imagen de video en canvas y convertir a base64 (opcional para guardarlo)
-        const canvas = document.createElement("canvas");
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        const imageBase64 = canvas.toDataURL("image/png");
-
-        try {
-          await push(ref(db, "asistencias"), {
-            user: currentUser,
-            role: userRole,
-            date: hoyFecha(),
-            time: hora,
-            photo: imageBase64
-          });
-          showSuccess("Asistencia registrada con éxito!");
-        } catch {
-          showError("Error al registrar asistencia.");
-        }
-        loader.style.display = "none";
-      };
-
-      const logout = () => {
-        stopCamera();
-        currentUser = "";
-        userRole = "";
-        attendanceRecords = {};
-        $("login-form").style.display = "block";
-        document.querySelector(".container").style.display = "none";
-        mensaje.textContent = "";
-        feedback.textContent = "";
-        $("username").value = "";
-        $("password").value = "";
-      };
-
-      const descargarExcel = () => {
-        const table = $("admin-attendance");
-        const wb = XLSX.utils.table_to_book(table, { sheet: "Asistencia" });
-        XLSX.writeFile(wb, `Asistencia_${hoyFecha()}.xlsx`);
-      };
-
-      // Voz para login/registro (simplificado)
-      const reconocimientoVoz = (callback) => {
-        if (!('webkitSpeechRecognition' in window)) {
-          alert("Tu navegador no soporta reconocimiento de voz.");
-          return;
-        }
-        const recognition = new webkitSpeechRecognition();
-        recognition.lang = "es-ES";
-        recognition.interimResults = false;
-        recognition.maxAlternatives = 1;
-        recognition.start();
-
-        recognition.onresult = (event) => {
-          const texto = event.results[0][0].transcript.toLowerCase();
-          callback(texto);
-        };
-        recognition.onerror = (e) => alert("Error de voz: " + e.error);
+      // Función breadcrumb
+      const updateBreadcrumb = (pathArray) => {
+        const breadcrumb = document.getElementById("breadcrumb");
+        breadcrumb.innerHTML = pathArray.join(" &gt; ");
       };
 
       $("login-button").onclick = () => {
@@ -363,26 +350,43 @@
         register($("username").value.trim(), $("password").value.trim(), $("role-select").value);
       };
 
-      $("logout-button").onclick = logout;
-
-      $("capture").onclick = registrarAsistencia;
-
-      $("download-excel").onclick = descargarExcel;
-
-      $("voice-login").onclick = () => {
-        reconocimientoVoz(texto => {
-          const [user, pass] = texto.split(" ");
-          login(user, pass);
-        });
+      $("logout-button").onclick = () => {
+        stopCamera();
+        currentUser = "";
+        userRole = "";
+        $("login-form").style.display = "block";
+        document.querySelector(".container").style.display = "none";
+        mensaje.textContent = "";
+        feedback.textContent = "";
+        updateBreadcrumb(["Página principal"]);
       };
 
-      $("voice-register").onclick = () => {
-        reconocimientoVoz(texto => {
-          const [user, pass] = texto.split(" ");
-          register(user, pass, $("role-select").value);
-        });
+      $("capture").onclick = async () => {
+        if (!currentUser) {
+          showError("Debe iniciar sesión primero");
+          return;
+        }
+        if (attendanceRecords[currentUser]) {
+          showError("Asistencia ya registrada hoy");
+          return;
+        }
+
+        // Registrar asistencia
+        const date = hoyFecha();
+        const time = new Date().toLocaleTimeString();
+        const asistenciaRef = push(ref(db, "asistencias"), { user: currentUser, role: userRole, date, time });
+        showSuccess("Asistencia registrada con éxito");
+        cargarAsistencia();
       };
+
+      // Llamadas iniciales
+      updateBreadcrumb(["Página principal"]);
     });
   </script>
 </body>
+</html>
+
+
+    <script type="module" src="script.js"></script>
+  </body>
 </html>
