@@ -23,7 +23,6 @@
       margin: 0;
       padding: 0;
     }
-
     .container, #login-form {
       margin: 60px auto;
       padding: 30px;
@@ -34,13 +33,11 @@
       box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
       color: #222;
     }
-
     h2, h3 {
       color: #c62828;
       margin-bottom: 20px;
       font-weight: bold;
     }
-
     button {
       margin-top: 20px;
       padding: 14px 28px;
@@ -53,12 +50,10 @@
       transition: all 0.3s ease;
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     }
-
     button:hover {
       background: #000000;
       transform: scale(1.05);
     }
-
     input, select {
       width: 95%;
       padding: 12px;
@@ -68,7 +63,6 @@
       font-size: 16px;
       box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
     }
-
     .video-container {
       display: flex;
       justify-content: center;
@@ -82,14 +76,12 @@
       overflow: hidden;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
     }
-
     #video {
       width: 100%;
       height: 100%;
       object-fit: cover;
       transform: scaleX(-1);
     }
-
     table {
       width: 100%;
       border-collapse: collapse;
@@ -100,38 +92,31 @@
       overflow: hidden;
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     }
-
     th, td {
       border: 1px solid #ddd;
       padding: 12px;
       text-align: center;
     }
-
     th {
       background: #c62828;
       color: white;
     }
-
     .admin-container {
       display: none;
     }
-
     #loader {
       font-weight: bold;
       margin-top: 20px;
       color: #2e7d32;
       display: none;
     }
-
     .flash {
       animation: flash 0.3s ease-in-out;
     }
-
     @keyframes flash {
       0% { background-color: #c62828; }
       100% { background-color: #000; }
     }
-
     .delete-btn {
       background-color: #e53935;
       border: none;
@@ -141,11 +126,9 @@
       cursor: pointer;
       transition: background-color 0.3s;
     }
-
     .delete-btn:hover {
       background-color: #b71c1c;
     }
-
     #message-popup {
       position: fixed;
       top: 10px;
@@ -159,12 +142,43 @@
       display: none;
       z-index: 9999;
     }
-
+    /* Breadcrumb style */
+    nav#breadcrumb {
+      margin: 15px auto;
+      width: 90%;
+      max-width: 600px;
+      font-size: 14px;
+      color: white;
+      text-align: left;
+      user-select: none;
+    }
+    nav#breadcrumb span {
+      cursor: pointer;
+      text-decoration: underline;
+    }
+    nav#breadcrumb span.current {
+      text-decoration: none;
+      cursor: default;
+      font-weight: bold;
+    }
+    /* Nuevos filtros admin */
+    #admin-filters {
+      margin: 15px 0 10px;
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    #admin-filters input {
+      width: auto;
+      max-width: 150px;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
   <!-- Breadcrumb -->
-  <nav id="breadcrumb" style="margin: 15px auto; width: 90%; max-width: 600px; font-size: 14px; color: white; text-align: left;"></nav>
+  <nav id="breadcrumb"></nav>
 
   <div id="login-form">
     <h2>🎓 Registro de Asistencia</h2>
@@ -178,12 +192,10 @@
     <button id="register-button">📝 Registrarse</button>
     <button id="voice-login">🎤 Iniciar con voz</button>
     <button id="voice-register">🎤 Registrar con voz</button>
-    <p id="mensaje"></p>
-    <p id="feedback"></p>
   </div>
 
   <div class="container" style="display:none;">
-    <h2>Bienvenido</h2>
+    <h2 id="welcome-title">Bienvenido</h2>
     <div class="video-container"><video id="video" autoplay></video></div>
     <button id="capture">✅ Registrar Asistencia</button>
     <p id="loader">Registrando asistencia...</p>
@@ -197,6 +209,11 @@
 
     <div id="admin-panel" class="admin-container">
       <h3>🛠 Panel de Administrador</h3>
+      <div id="admin-filters">
+        <input type="text" id="filter-user" placeholder="Filtrar por usuario" />
+        <input type="date" id="filter-date" />
+        <button id="clear-filters">Limpiar filtros</button>
+      </div>
       <button id="download-excel">📥 Descargar Excel</button>
       <table id="admin-attendance">
         <thead><tr><th>Usuario</th><th>Rol</th><th>Fecha</th><th>Hora</th><th>Acción</th></tr></thead>
@@ -205,202 +222,412 @@
     </div>
   </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-    import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-database.js";
-    import * as XLSX from "https://cdn.sheetjs.com/xlsx-0.20.0/package/xlsx.mjs";
+  <div id="message-popup"></div>
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyBQFdu36zRwL8OpoX6883pOuDyqcakfurY",
-      authDomain: "asistencia-docentes-9de71.firebaseapp.com",
-      databaseURL: "https://asistencia-docentes-9de71-default-rtdb.firebaseio.com",
-      projectId: "asistencia-docentes-9de71",
-      storageBucket: "asistencia-docentes-9de71.appspot.com",
-      messagingSenderId: "933641363169",
-      appId: "1:933641363169:web:5001d5ad0a37a0e4e8e1a0",
-      measurementId: "G-HYF7KLQ5NZ"
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+  import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-database.js";
+  import * as XLSX from "https://cdn.sheetjs.com/xlsx-0.20.0/package/xlsx.mjs";
+
+  // Config Firebase
+  const firebaseConfig = {
+    apiKey: "AIzaSyBQFdu36zRwL8OpoX6883pOuDyqcakfurY",
+    authDomain: "asistencia-docentes-9de71.firebaseapp.com",
+    databaseURL: "https://asistencia-docentes-9de71-default-rtdb.firebaseio.com",
+    projectId: "asistencia-docentes-9de71",
+    storageBucket: "asistencia-docentes-9de71.appspot.com",
+    messagingSenderId: "535964294750",
+    appId: "1:535964294750:web:1325e29f01a1e7be41f2be",
+  };
+
+  // Inicializar Firebase
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  // Referencias DOM
+  const loginForm = document.getElementById("login-form");
+  const container = document.querySelector(".container");
+  const usernameInput = document.getElementById("username");
+  const passwordInput = document.getElementById("password");
+  const roleSelect = document.getElementById("role-select");
+  const loginBtn = document.getElementById("login-button");
+  const registerBtn = document.getElementById("register-button");
+  const voiceLoginBtn = document.getElementById("voice-login");
+  const voiceRegisterBtn = document.getElementById("voice-register");
+  const logoutBtn = document.getElementById("logout-button");
+  const captureBtn = document.getElementById("capture");
+  const video = document.getElementById("video");
+  const attendanceTableBody = document.querySelector("#attendance-table tbody");
+  const adminPanel = document.getElementById("admin-panel");
+  const adminAttendanceTableBody = document.querySelector("#admin-attendance tbody");
+  const downloadExcelBtn = document.getElementById("download-excel");
+  const filterUserInput = document.getElementById("filter-user");
+  const filterDateInput = document.getElementById("filter-date");
+  const clearFiltersBtn = document.getElementById("clear-filters");
+  const breadcrumb = document.getElementById("breadcrumb");
+  const messagePopup = document.getElementById("message-popup");
+  const loader = document.getElementById("loader");
+  const welcomeTitle = document.getElementById("welcome-title");
+
+  // Estado
+  let currentUser = null;
+  let currentRole = null;
+  let usersList = [];
+  let attendanceRecords = [];
+  let adminRecords = [];
+
+  // Mostrar mensaje popup
+  function showMessage(text, duration = 3000) {
+    messagePopup.textContent = text;
+    messagePopup.style.display = "block";
+    setTimeout(() => {
+      messagePopup.style.display = "none";
+    }, duration);
+  }
+
+  // Breadcrumb navigation
+  function updateBreadcrumb() {
+    breadcrumb.innerHTML = "";
+    if (!currentUser) {
+      breadcrumb.innerHTML = `<span class="current">Login</span>`;
+      return;
+    }
+    const homeSpan = document.createElement("span");
+    homeSpan.textContent = "Inicio";
+    homeSpan.style.cursor = "pointer";
+    homeSpan.onclick = () => {
+      showAttendanceView();
     };
+    breadcrumb.appendChild(homeSpan);
+    breadcrumb.innerHTML += " &gt; ";
+    if (currentRole === "admin") {
+      const adminSpan = document.createElement("span");
+      adminSpan.textContent = "Panel Admin";
+      adminSpan.classList.add("current");
+      breadcrumb.appendChild(adminSpan);
+    } else {
+      const attendanceSpan = document.createElement("span");
+      attendanceSpan.textContent = "Asistencia";
+      attendanceSpan.classList.add("current");
+      breadcrumb.appendChild(attendanceSpan);
+    }
+  }
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+  // Función para iniciar cámara
+  async function startCamera() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      video.srcObject = stream;
+    } catch (error) {
+      showMessage("No se pudo acceder a la cámara");
+    }
+  }
 
-    document.addEventListener("DOMContentLoaded", () => {
-      const $ = id => document.getElementById(id);
-      const usersKey = "users";
+  // Guardar usuario y contraseña (en Realtime DB)
+  function saveUser(username, password, role) {
+    const usersRef = ref(db, "usuarios");
+    push(usersRef, { username, password, role });
+  }
 
-      let currentUser = "", userRole = "", stream = null;
-
-      const video = $("video");
-      const feedback = $("feedback");
-      const mensaje = $("mensaje");
-      const loader = $("loader");
-
-      let attendanceRecords = {};
-
-      const showError = msg => {
-        mensaje.textContent = `⚠️ ${msg}`;
-        mensaje.style.color = "red";
-      };
-      const showSuccess = msg => {
-        feedback.textContent = msg;
-        feedback.style.color = "green";
-        setTimeout(() => feedback.textContent = "", 3000);
-      };
-
-      const getUsers = () => JSON.parse(localStorage.getItem(usersKey)) || {};
-
-      const startCamera = async () => {
-        try {
-          stream = await navigator.mediaDevices.getUserMedia({ video: true });
-          video.srcObject = stream;
-        } catch {
-          showError("No se pudo acceder a la cámara.");
-        }
-      };
-
-      const stopCamera = () => stream?.getTracks().forEach(track => track.stop());
-
-      const login = (user, pass) => {
-        const users = getUsers();
-        if (users[user]?.password === pass) {
-          currentUser = user;
-          userRole = users[user].role;
-          $("login-form").style.display = "none";
-          document.querySelector(".container").style.display = "block";
-          $("admin-panel").style.display = userRole === "admin" ? "block" : "none";
-          startCamera();
-          cargarAsistencia();
-          mensaje.textContent = "";
-        } else {
-          showError("Credenciales incorrectas");
-        }
-      };
-
-      const register = (user, pass, role) => {
-        if (!user || !pass) {
-          showError("Usuario y contraseña requeridos");
-          return;
-        }
-        const users = getUsers();
-        if (users[user]) {
-          showError("Usuario ya existe");
-          return;
-        }
-        users[user] = { password: pass, role };
-        localStorage.setItem(usersKey, JSON.stringify(users));
-        showSuccess("Usuario registrado con éxito");
-      };
-
-      const hoyFecha = () => new Date().toISOString().slice(0, 10);
-
-      const cargarAsistencia = () => {
-        const attendanceRef = ref(db, "asistencias");
-        onValue(attendanceRef, (snapshot) => {
-          attendanceRecords = {};
-          const data = snapshot.val() || {};
-          $("attendance-table").querySelector("tbody").innerHTML = "";
-          $("admin-attendance").querySelector("tbody").innerHTML = "";
-
-          Object.entries(data).forEach(([key, { user, role, date, time }]) => {
-            if (date === hoyFecha()) {
-              // Solo mostrar asistencia del día
-              const tr = document.createElement("tr");
-              tr.innerHTML = `<td>${user}</td><td>${date}</td><td>${time}</td>`;
-              $("attendance-table").querySelector("tbody").appendChild(tr);
-
-              if (userRole === "admin") {
-                const adminTr = document.createElement("tr");
-                adminTr.innerHTML = `
-                  <td>${user}</td>
-                  <td>${role}</td>
-                  <td>${date}</td>
-                  <td>${time}</td>
-                  <td><button class="delete-btn" data-key="${key}">Eliminar</button></td>
-                `;
-                $("admin-attendance").querySelector("tbody").appendChild(adminTr);
-              }
-              attendanceRecords[user] = true;
-            }
-          });
-
-          // Attach delete handlers if admin
-          if (userRole === "admin") {
-            document.querySelectorAll(".delete-btn").forEach(btn => {
-              btn.onclick = () => {
-                if (confirm("¿Eliminar este registro?")) {
-                  remove(ref(db, `asistencias/${btn.dataset.key}`));
-                }
-              };
-            });
+  // Validar usuario y contraseña (login)
+  function validateUser(username, password, role) {
+    return new Promise((resolve) => {
+      const usersRef = ref(db, "usuarios");
+      onValue(usersRef, (snapshot) => {
+        usersList = [];
+        let valid = false;
+        snapshot.forEach((child) => {
+          const data = child.val();
+          const key = child.key;
+          usersList.push({ key, ...data });
+          if (data.username === username && data.password === password && data.role === role) {
+            valid = true;
+            currentUser = data.username;
+            currentRole = data.role;
+            resolve(true);
           }
         });
-      };
+        if (!valid) resolve(false);
+      }, { onlyOnce: true });
+    });
+  }
 
-      // Función para descargar el Excel
-      $("download-excel").onclick = () => {
-        const wb = XLSX.utils.table_to_book($("admin-attendance"));
-        XLSX.writeFile(wb, "asistencias.xlsx");
-      };
+  // Registrar asistencia
+  function registerAttendance(user) {
+    loader.style.display = "block";
+    const now = new Date();
+    const fecha = now.toLocaleDateString("es-ES");
+    const hora = now.toLocaleTimeString("es-ES", { hour12: false });
+    const attendanceRef = ref(db, "asistencia");
+    push(attendanceRef, { username: user, fecha, hora }).then(() => {
+      loader.style.display = "none";
+      showMessage(`Asistencia registrada para ${user}`, 2500);
+      loadAttendance(user);
+      if (currentRole === "admin") {
+        loadAdminAttendance();
+      }
+    });
+  }
 
-      // Mostrar mensaje de "regístrese o inicie sesión"
-      const messagePopup = document.createElement('div');
-      messagePopup.id = 'message-popup';
-      document.body.appendChild(messagePopup);
-
-      // Excepción: Si se hace clic dentro del formulario de login o los botones, no mostrar el mensaje
-      const formulario = $("login-form");
-      formulario.addEventListener('click', (event) => event.stopPropagation());
-
-      document.body.addEventListener('click', () => {
-        if (!currentUser) {
-          messagePopup.style.display = 'block';
-          messagePopup.textContent = '¡Regístrese o inicie sesión!';
-          setTimeout(() => {
-            messagePopup.style.display = 'none';
-          }, 3000);
+  // Cargar asistencia para usuario normal
+  function loadAttendance(user) {
+    const attendanceRef = ref(db, "asistencia");
+    onValue(attendanceRef, (snapshot) => {
+      attendanceTableBody.innerHTML = "";
+      attendanceRecords = [];
+      snapshot.forEach((child) => {
+        const data = child.val();
+        if (data.username === user) {
+          attendanceRecords.push(data);
+          const row = document.createElement("tr");
+          row.innerHTML = `<td>${data.username}</td><td>${data.fecha}</td><td>${data.hora}</td>`;
+          attendanceTableBody.appendChild(row);
         }
       });
+    }, { onlyOnce: true });
+  }
 
-      $("login-button").onclick = () => {
-        login($("username").value.trim(), $("password").value.trim());
-      };
+  // Cargar asistencia para admin
+  function loadAdminAttendance() {
+    const attendanceRef = ref(db, "asistencia");
+    onValue(attendanceRef, (snapshot) => {
+      adminAttendanceTableBody.innerHTML = "";
+      adminRecords = [];
+      snapshot.forEach((child) => {
+        const data = child.val();
+        adminRecords.push({ key: child.key, ...data });
+      });
+      renderAdminTable(adminRecords);
+    }, { onlyOnce: true });
+  }
 
-      $("register-button").onclick = () => {
-        register($("username").value.trim(), $("password").value.trim(), $("role-select").value);
-      };
+  // Render tabla admin con filtros
+  function renderAdminTable(records) {
+    adminAttendanceTableBody.innerHTML = "";
+    let filtered = records;
 
-      $("logout-button").onclick = () => {
-        stopCamera();
-        currentUser = "";
-        userRole = "";
-        $("login-form").style.display = "block";
-        document.querySelector(".container").style.display = "none";
-        mensaje.textContent = "";
-        feedback.textContent = "";
-      };
+    const filterUser = filterUserInput.value.toLowerCase();
+    const filterDate = filterDateInput.value;
 
-      $("capture").onclick = async () => {
-        if (!currentUser) {
-          showError("Debe iniciar sesión primero");
-          return;
-        }
-        if (attendanceRecords[currentUser]) {
-          showError("Asistencia ya registrada hoy");
-          return;
-        }
+    if (filterUser) {
+      filtered = filtered.filter(r => r.username.toLowerCase().includes(filterUser));
+    }
+    if (filterDate) {
+      filtered = filtered.filter(r => r.fecha === filterDate);
+    }
 
-        // Registrar asistencia
-        const date = hoyFecha();
-        const time = new Date().toLocaleTimeString();
-        const asistenciaRef = push(ref(db, "asistencias"), { user: currentUser, role: userRole, date, time });
-        showSuccess("Asistencia registrada con éxito");
-        cargarAsistencia();
-      };
-
-      // Llamadas iniciales
-      updateBreadcrumb(["Página principal"]);
+    filtered.forEach(record => {
+      const userData = usersList.find(u => u.username === record.username) || {};
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${record.username}</td>
+        <td>${userData.role || "-"}</td>
+        <td>${record.fecha}</td>
+        <td>${record.hora}</td>
+        <td><button class="delete-btn" data-key="${record.key}">Eliminar</button></td>
+      `;
+      adminAttendanceTableBody.appendChild(tr);
     });
-  </script>
+
+    // Eventos para eliminar
+    document.querySelectorAll(".delete-btn").forEach(btn => {
+      btn.onclick = () => {
+        const key = btn.getAttribute("data-key");
+        remove(ref(db, `asistencia/${key}`))
+          .then(() => {
+            showMessage("Registro eliminado");
+            loadAdminAttendance();
+          });
+      };
+    });
+  }
+
+  // Exportar Excel
+  function exportToExcel(records) {
+    const wsData = [["Usuario", "Rol", "Fecha", "Hora"]];
+    records.forEach(r => {
+      const userRole = usersList.find(u => u.username === r.username)?.role || "-";
+      wsData.push([r.username, userRole, r.fecha, r.hora]);
+    });
+
+    const worksheet = XLSX.utils.aoa_to_sheet(wsData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Asistencia");
+    XLSX.writeFile(workbook, "registro_asistencia.xlsx");
+  }
+
+  // Eventos filtros admin
+  filterUserInput.oninput = () => renderAdminTable(adminRecords);
+  filterDateInput.onchange = () => renderAdminTable(adminRecords);
+  clearFiltersBtn.onclick = () => {
+    filterUserInput.value = "";
+    filterDateInput.value = "";
+    renderAdminTable(adminRecords);
+  };
+
+  // Mostrar vista de login
+  function showLoginView() {
+    loginForm.style.display = "block";
+    container.style.display = "none";
+    adminPanel.style.display = "none";
+    updateBreadcrumb();
+  }
+
+  // Mostrar vista de asistencia usuario normal
+  function showAttendanceView() {
+    loginForm.style.display = "none";
+    container.style.display = "block";
+    adminPanel.style.display = "none";
+    welcomeTitle.textContent = `Bienvenido, ${currentUser}`;
+    updateBreadcrumb();
+    loadAttendance(currentUser);
+    startCamera();
+  }
+
+  // Mostrar vista admin
+  function showAdminView() {
+    loginForm.style.display = "none";
+    container.style.display = "block";
+    adminPanel.style.display = "block";
+    welcomeTitle.textContent = `Administrador: ${currentUser}`;
+    updateBreadcrumb();
+    loadAdminAttendance();
+    startCamera();
+  }
+
+  // Login
+  loginBtn.onclick = async () => {
+    const username = usernameInput.value.trim();
+    const password = passwordInput.value.trim();
+    const role = roleSelect.value;
+    if (!username || !password) {
+      showMessage("Completa usuario y contraseña");
+      return;
+    }
+    const valid = await validateUser(username, password, role);
+    if (valid) {
+      showMessage("Login exitoso");
+      if (role === "admin") showAdminView();
+      else showAttendanceView();
+    } else {
+      showMessage("Usuario o contraseña incorrectos");
+    }
+  };
+
+  // Registro
+  registerBtn.onclick = () => {
+    const username = usernameInput.value.trim();
+    const password = passwordInput.value.trim();
+    const role = roleSelect.value;
+    if (!username || !password) {
+      showMessage("Completa usuario y contraseña");
+      return;
+    }
+    // Verificar si usuario existe
+    const exists = usersList.some(u => u.username === username);
+    if (exists) {
+      showMessage("Usuario ya registrado");
+      return;
+    }
+    saveUser(username, password, role);
+    showMessage("Usuario registrado. Ya puedes iniciar sesión.");
+  };
+
+  // Logout
+  logoutBtn.onclick = () => {
+    currentUser = null;
+    currentRole = null;
+    attendanceRecords = [];
+    adminRecords = [];
+    usernameInput.value = "";
+    passwordInput.value = "";
+    showLoginView();
+    stopCamera();
+  };
+
+  // Registrar asistencia con botón
+  captureBtn.onclick = () => {
+    if (currentUser) {
+      registerAttendance(currentUser);
+    }
+  };
+
+  // Cámara: parar cámara
+  function stopCamera() {
+    if (video.srcObject) {
+      video.srcObject.getTracks().forEach(track => track.stop());
+      video.srcObject = null;
+    }
+  }
+
+  // Reconocimiento de voz para login y registro
+  async function voiceRecognitionProcess(isLogin) {
+    if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+      alert("Tu navegador no soporta reconocimiento de voz");
+      return;
+    }
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    recognition.lang = "es-ES";
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    showMessage(`Habla el usuario para ${isLogin ? "login" : "registro"}`, 4000);
+
+    recognition.start();
+
+    recognition.onresult = async (event) => {
+      const spokenText = event.results[0][0].transcript.trim().toLowerCase();
+      const words = spokenText.split(" ");
+      if (words.length < 2) {
+        showMessage("Debes decir usuario y contraseña separados por espacio");
+        return;
+      }
+      const username = words[0];
+      const password = words.slice(1).join(""); // junta el resto para password
+      usernameInput.value = username;
+      passwordInput.value = password;
+      if (isLogin) {
+        const role = roleSelect.value;
+        const valid = await validateUser(username, password, role);
+        if (valid) {
+          showMessage("Login por voz exitoso");
+          currentUser = username;
+          currentRole = role;
+          if (role === "admin") showAdminView();
+          else showAttendanceView();
+        } else {
+          showMessage("Usuario o contraseña incorrectos");
+        }
+      } else {
+        const exists = usersList.some(u => u.username === username);
+        if (exists) {
+          showMessage("Usuario ya registrado");
+          return;
+        }
+        const role = roleSelect.value;
+        saveUser(username, password, role);
+        showMessage("Usuario registrado por voz. Ya puedes iniciar sesión.");
+      }
+    };
+
+    recognition.onerror = (event) => {
+      showMessage("Error en reconocimiento de voz: " + event.error);
+    };
+  }
+
+  voiceLoginBtn.onclick = () => voiceRecognitionProcess(true);
+  voiceRegisterBtn.onclick = () => voiceRecognitionProcess(false);
+
+  // Descargar Excel admin
+  downloadExcelBtn.onclick = () => {
+    exportToExcel(adminRecords);
+  };
+
+  // Al cargar la página mostrar login
+  showLoginView();
+
+</script>
 </body>
 </html>
 
